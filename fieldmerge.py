@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-# file: netcdf_cli.py
+# file: fieldmerge.py
 
 import argparse
 import os
@@ -180,7 +180,7 @@ def main():
         help="Path for the merged output NetCDF file",
     )
     merge_parser.add_argument(
-        "--chunk_size", type=int, default=10, help="Chunk size for merging time steps"
+        "--chunk_size", type=int, default=50, help="Chunk size for merging time steps"
     )
     merge_parser.add_argument(
         "--profile_file", help="Optional profile file to add to the merged NetCDF file"
