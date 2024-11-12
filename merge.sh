@@ -14,8 +14,8 @@ module load miniconda3/4.12.0
 conda activate base
 pip install -r requirements.txt
 
-INPUT_DIR = "/scratch/ldonadio/dales-runs/utrecht_ideal_save/"
-PROFILE_FILE = /scratch/ldonadio/dales-runs/utrecht_ideal_save/profiles_lite.001.nc
-OUTPUT_FILE = /scratch/ldonadio/dales-runs/utrecht_ideal_save/completefielddump.nc
+INPUT_DIR="/scratch/ldonadio/dales-runs/utrecht_ideal_save/"
+PROFILE_FILE=/scratch/ldonadio/dales-runs/utrecht_ideal_save/profiles_lite.001.nc
+OUTPUT_FILE=/scratch/ldonadio/dales-runs/utrecht_ideal_save/completefielddump.nc
 
 python fieldmerge.py merge --input_dir ${INPUT_DIR} --profile_file ${PROFILE_FILE} --output_file ${OUTPUT_FILE} 
