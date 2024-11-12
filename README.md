@@ -18,6 +18,13 @@ Load necessary modules with Lmod:
 
 module load <module-name> 
 
+Option 3: a mix of both:
+
+module load 2024r1
+module load miniconda3/4.12.0
+conda activate base
+pip install -r requirements.txt
+
 **Example Usage**
 
 Suppose you have a typical DALES output directory containing multiple NetCDF files, located here:
