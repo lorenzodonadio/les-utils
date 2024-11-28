@@ -20,23 +20,23 @@ def main():
         "ustar": 5,
     }
     linear_then_streched = {
-        "profile": "linstrech",
-        "p0": 0,  # intersect
-        "dp0": 0.5,  # slope
+        "profile": "stretch",
+        "y0": 0,  # intersect
+        "dy0": 0.5,  # slope
         "gf": 1.2,  # growth factor
         "zstretch": 50,  # height form which growth factor takes effect
     }
 
     # if zstretch is not provided then this becomes just linear profile
     thl_linear = {
-        "profile": "linstrech",
-        "p0": 298,
-        "dp0": 0.1,
+        "profile": "linear",
+        "y0": 298,
+        "dy0": 0.1,
     }
     wfls_linear = {
-        "profile": "linstrech",
-        "p0": 0,
-        "dp0": 0.00022,
+        "profile": "linear",
+        "y0": 0,
+        "dy0": 0.00022,
     }
 
     # Initialize DALESInpGenerator
@@ -46,7 +46,7 @@ def main():
         gf=gf,
         stretch_start_index=stretch_start_index,
         expn="001",
-        output_dir="/home/lorenzolds/Desktop/phd/dales_stuff/les-utils/examples/output",  # make sure the directory exists
+        output_dir="./output",  # make sure the directory exists
         # Populate initial profiles using kwargs
         thl=thl_linear,  # Constant potential temperature
         qt=np.linspace(0.01, 0.02, kmax),  # Specific humidity gradient
@@ -89,14 +89,14 @@ def main():
     ig.add_ls_flux(ig.dflscale, time=0, wtsurf=0.1)
     # for the next times we can easily create more dataframes using create_lscale_df
     ig.add_ls_flux(
-        ig.create_lscale_df(ug=1, dthldt={"profile": "linstrech", "dp0": 0.2}),
+        ig.create_lscale_df(ug=1, dthldt={"profile": "linear", "dy0": 0.2}),
         time=3600,
         wtsurf=0.2,
         thlsurf=0.1,
     )
 
     ig.add_ls_flux(
-        ig.create_lscale_df(ug=5, dthldt={"profile": "linstrech", "dp0": -0.2}),
+        ig.create_lscale_df(ug=5, dthldt={"profile": "linear", "dy0": -0.2}),
         time=7200,
         wtsurf=0.2,
         thlsurf=0.1,

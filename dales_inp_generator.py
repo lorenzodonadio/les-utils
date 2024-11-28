@@ -34,14 +34,14 @@ def isonow():
     return datetime.isoformat(datetime.now(), sep="_", timespec="minutes")
 
 
-def linstrech_prof(z: np.array, p0=0, dp0=1, gf=1.08, zstretch=10e8):
+def stretch_prof(z: np.array, y0=0, dy0=1, gf=1.08, zstretch=10e8):
     """
     Generate a linear-stretch profile based on height values with optional stretching.
 
     Parameters:
         z (np.array): Array of height values representing the vertical grid.
-        p0 (float, optional): Base value for the profile. Default is 0.
-        dp0 (float, optional): Linear increment per grid level. Default is 1.
+        y0 (float, optional): Base value for the profile. Default is 0.
+        dy0 (float, optional): Linear increment per grid level. Default is 1.
         gf (float, optional): Growth factor for stretching the profile beyond `zstretch`. Default is 1.08.
         zstretch (float, optional): Threshold height. Profile values below this height are linearly spaced,
                                     while values beyond this are exponentially stretched. Default is 1e9.
@@ -50,16 +50,20 @@ def linstrech_prof(z: np.array, p0=0, dp0=1, gf=1.08, zstretch=10e8):
         np.array: Array of profile values, linearly increasing until `zstretch` and stretched thereafter.
 
     Notes:
-        - Linear values are computed as `prof = p0 + dp0 * z` for all `z`.
+        - Linear values are computed as `prof = y0 + dy0 * z` for all `z`.
         - For `z` values below `zstretch`, the linear profile remains unchanged.
         - For `z` values above `zstretch`, the linear profile is raised to the power of `gf` to introduce stretching.
     """
-    prof = p0 + dp0 * z
 
     if zstretch < z[-1]:
-        prof[z < zstretch] = prof[z < zstretch] ** gf
+        ssi = np.searchsorted(z, zstretch)
+        dy = np.array(
+            [dy0 if i < ssi else dy0 * (gf ** (i - ssi)) for i in range(len(z))]
+        )
+    else:
+        dy = dy0
 
-    return prof
+    return y0 + dy * z
 
 
 class DALESInpGenerator:
@@ -160,9 +164,9 @@ class DALESInpGenerator:
                             - `z0` (roughness length, default 0.1)
                             - `d` (displacement height, default 0)
                             - `ustar` (friction velocity, default 1)
-                        * `linstrech`: Specify linear-stretch profile parameters:
-                            - `p0` (base value, default 0)
-                            - `dp0` (increment, default 1)
+                        * `stretch`: Specify linear-stretch profile parameters:
+                            - `y0` (base value, default 0)
+                            - `dy0` (increment, default 1)
                             - `gf` (growth factor, default 1.08)
                             - `zstretch` (threshold height, default 1e9)
 
@@ -299,23 +303,35 @@ class DALESInpGenerator:
 
     def _generate_vertical_grid(self):
         """Returns: numpy.ndarray: An array representing the vertical grid edges (`kmax + 1`) points)."""
-        grid = self.dz0 * np.linspace(0, self.kmax, self.kmax + 1)
-        grid[self.stretch_start_index :] = grid[self.stretch_start_index :] ** self.gf
-        return grid
+        grid = np.linspace(0, self.kmax, self.kmax + 1)
+
+        ssi = self.stretch_start_index
+        if ssi > len(grid):
+            dz = self.dz0
+        for i in range(ssi, self.kmax):
+            dz = np.array(
+                [
+                    self.dz0 if i < ssi else self.dz0 * (self.gf ** (i - ssi))
+                    for i in range(self.kmax + 1)
+                ]
+            )
+
+        return grid * dz
 
     def _validate_prof(self, x):
         if x is None:
             return self._fillval
 
         if isinstance(x, dict):
-            print(x)
             x = deepcopy(x)
             proftype = x.pop("profile")
             if proftype == "log":
                 return self._log_prof(**x)
 
-            if proftype == "linstrech":
-                return self._linstrech_prof(**x)
+            if proftype == "linear":
+                return self._linear_prof(**x)
+            if proftype == "stretch":
+                return self._stretch_prof(**x)
 
         elif isinstance(x, np.ndarray):
             assert len(x) == len(
@@ -331,14 +347,19 @@ class DALESInpGenerator:
     # def _log_prof(self, z0=0.1, d=10, ustar=1):
     #     return log_prof(self.z,z0,d,ustar)
 
-    # def _linstrech_prof(self, p0=0, dp0=1, gf=1.08, zstretch=10e8):
-    #     return linstrech_prof(self.z,p0,dp0,gf,zstretch)
+    # def _stretch_prof(self, y0=0, dy0=1, gf=1.08, zstretch=10e8):
+    #     return stretch_prof(self.z,y0,dy0,gf,zstretch)
 
     def _log_prof(self, **kwargs):
         return log_prof(self.z, **kwargs)
 
-    def _linstrech_prof(self, **kwargs):
-        return linstrech_prof(self.z, **kwargs)
+    def _stretch_prof(self, **kwargs):
+        return stretch_prof(self.z, **kwargs)
+
+    def _linear_prof(self, **kwargs):
+        y0 = kwargs.get("y0", 0)
+        dy0 = kwargs.get("dy0", 1)
+        return y0 + dy0 * self.z
 
     def write_simple_profile(self, filename, df, header):
 
