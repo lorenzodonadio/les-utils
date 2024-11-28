@@ -3,6 +3,10 @@
 
 LES-Utils is a set of utilities for processing and managing NetCDF data output from large eddy simulations (LES), particularly from DALES simulations.
 
+one can :
+-   Merge output fielddumps
+-   Create all the necesary .inp files for a dales simulation
+
 **Installation Requirements**
 
 You can install the dependencies via either pip or Lmod.
@@ -25,7 +29,11 @@ module load miniconda3/4.12.0
 conda activate base
 pip install -r requirements.txt
 
-**Example Usage**
+**PROFILES CREATON: Example Usage**
+
+see `/examples` folder for use of dales_inp_generator.py
+
+**MERGE: Example Usage**
 
 Suppose you have a typical DALES output directory containing multiple NetCDF files, located here:
 

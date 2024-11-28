@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 from os import path
 from datetime import datetime
+from copy import deepcopy
 
 
 def log_prof(z: np.array, z0=0.1, d=0, ustar=1):
@@ -20,10 +21,12 @@ def log_prof(z: np.array, z0=0.1, d=0, ustar=1):
     Raises:
         ValueError: If displacement height is greater than the first height in z.
     """
-    if d > z[0]:
+    if d >= z[0]:
         raise ValueError(
-            "Negative (z-d) not allowed in ln((z-d)/z0) - reduce d to less than z[0]"
+            "Negative or zero (z-d) not allowed in ln((z-d)/z0) - reduce d to less than z[0]"
         )
+    if z0 <= 0:
+        raise ValueError("z0 must be greater than 0")
     return (ustar / 0.41) * np.log((z - d) / z0)
 
 
@@ -189,6 +192,7 @@ class DALESInpGenerator:
         self.dfscalar = (
             pd.DataFrame()
         )  # this is special since the user can add as many columns as they want with add_scalar func
+
         self.dfprof = self.create_prof_df(**kwargs)
         self.dflscale = self.create_lscale_df(**kwargs)
         self.dfbaseprof = self.create_baseprof_df(**kwargs)
@@ -304,6 +308,8 @@ class DALESInpGenerator:
             return self._fillval
 
         if isinstance(x, dict):
+            print(x)
+            x = deepcopy(x)
             proftype = x.pop("profile")
             if proftype == "log":
                 return self._log_prof(**x)
