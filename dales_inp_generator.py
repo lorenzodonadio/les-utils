@@ -164,9 +164,12 @@ class DALESInpGenerator:
                             - `z0` (roughness length, default 0.1)
                             - `d` (displacement height, default 0)
                             - `ustar` (friction velocity, default 1)
+                        * `linear`: linear profile parameters:
+                            - `y0` (base value, default 0)
+                            - `dy0` (slope: dy/dz, default 1)
                         * `stretch`: Specify linear-stretch profile parameters:
                             - `y0` (base value, default 0)
-                            - `dy0` (increment, default 1)
+                            - `dy0` (initial slope: dy/dz, default 1)
                             - `gf` (growth factor, default 1.08)
                             - `zstretch` (threshold height, default 1e9)
 
