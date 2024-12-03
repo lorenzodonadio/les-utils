@@ -5,6 +5,52 @@ from datetime import datetime
 from copy import deepcopy
 
 
+def df2lines(
+    df: pd.DataFrame, low_sci=1e-3, high_sci=1e3, format_width=12, format_precision=5
+):
+    """
+    Convert a DataFrame to lines of formatted strings.
+
+    columns of only zeroes will not be converted to scientific notation
+
+    Parameters:
+    - df: pd.DataFrame - Input DataFrame
+    - low_sci: tuple - Low treshold to write in scientific notation
+    - high_sci: tuple - High treshold to write in scientific notation
+    - format_width: int - Total width for each formatted value
+    - format_precision: int - Precision of the formatted value
+
+    Returns:
+    - list of strings: Formatted rows as strings
+    """
+    dfabs = df.abs()
+    colmax = dfabs.max()
+    colmin = dfabs[dfabs > 0].min()  # Exclude zeros for minimum computation
+
+    # Determine if each column requires scientific notation
+    is_sci = {
+        col: (colmax[col] > high_sci or (col in colmin and colmin[col] < low_sci))
+        for col in df.columns
+    }
+
+    # Define formatting strings
+    sci_format = f"{{:>{format_width}.{format_precision}e}}"
+    float_format = f"{{:>{format_width}.{format_precision}f}}"
+
+    # Generate rows
+    lines = []
+    for _, row in df.iterrows():
+        formatted_row = ""
+        for col, value in row.items():
+            if is_sci[col]:
+                formatted_row += sci_format.format(value)
+            else:
+                formatted_row += float_format.format(value)
+        lines.append(formatted_row + "\n")
+
+    return lines
+
+
 def log_prof(z: np.array, z0=0.1, d=0, ustar=1):
     """
     Compute logarithmic profile for a given height array: f(z) = (ustar/k) * ln((z-d)/z0).
@@ -126,6 +172,7 @@ class DALESInpGenerator:
         expn="001",
         output_dir=".",
         write_created_at=True,
+        format_opts=None,
         **kwargs,
     ):
         """
@@ -143,6 +190,13 @@ class DALESInpGenerator:
             expn (str): Experiment identifier used in output file naming. Default is "001".
             output_dir (str): Directory where generated files will be saved. Default is ".".
             write_created_at (bool): Whether to include a timestamp in file headers. Default is True.
+            format_opts (dict | None): configure formating of output text files:
+                default => format_opts = {
+                    "low_sci ": 1e-3,   # low treshold to use scientific notation
+                    "high_sci ": 1e3,   # high treshold to use scientific notation
+                    "format_width": 12, # format width {format_width.format_precision}
+                    "format_precision": 5, # format width {format_width.format_precision}
+                }
             **kwargs: Supported keyword arguments to populate profile columns. If not provided,
                     these columns will be initialized with zeros.
 
@@ -185,6 +239,20 @@ class DALESInpGenerator:
         """
         assert stretch_start_index > 0
 
+        self.format_opts = {
+            "low_sci": 1e-3,
+            "high_sci": 1e3,
+            "format_width": 12,
+            "format_precision": 5,
+        }
+
+        # override format options
+        if isinstance(format_opts, dict):
+            for k in self.format_opts.keys():
+                v = format_opts.get(k)
+                if v is not None:
+                    self.format_opts[k] = v
+
         self.expn = expn
         self.kmax = kmax
         self.dz0 = dz0
@@ -212,6 +280,9 @@ class DALESInpGenerator:
         self.dflsfluxsurf = self.dflsfluxsurf.astype({"time": int})
         self.dflsflux = self.dflsflux.astype({"time": int})
         self.dfnudge = self.dfnudge.astype({"time": int})
+
+    def _df2lines(self, df):
+        return df2lines(df, **self.format_opts)
 
     def write_file(self, filename: str, header: str, lines: list[str]):
         filename = path.join(self.output_dir, filename)
@@ -374,14 +445,8 @@ class DALESInpGenerator:
         else:
             header = f"# {header} - {isonow()}\n       {vnames}\n"
 
-        # Format lines from the df
-        lines = [
-            "".join(f"{r[col]:>13.6f}" for col in df.columns) + "\n"
-            for _, r in df.iterrows()
-        ]
-
         # Write to file
-        self.write_file(filename, header, lines)
+        self.write_file(filename, header, self._df2lines(df))
 
     def write_prof(self, filename="prof.inp", header="Input Profiles"):
         self.write_simple_profile(filename, self.dfprof, header)
@@ -418,11 +483,7 @@ class DALESInpGenerator:
             header = f"# {header} - {isonow()}\n      {vnames}\n\n"
 
         # Format lines from the df
-        linessurf = [
-            "".join(f"{r[col]:>13.6f}" for col in self.dflsfluxsurf.columns) + "\n"
-            for _, r in self.dflsfluxsurf.iterrows()
-        ]
-
+        linessurf = self._df2lines(self.dflsfluxsurf)
         # Format lines from the df
         linestime = self._prepare_lines_for_timegroupped_df(self.dflsflux)
         lines = linessurf + ["\nLarge Scale Forcing Terms\n"] + linestime
@@ -449,10 +510,7 @@ class DALESInpGenerator:
         for time, group in df.groupby("time"):
             lines.append(f"       {vnames}\n")
             lines.append(f"#   {time}\n")
-            lines.extend(
-                "".join(f"{r[c]:>13.6f}" for c in group.columns if c != "time") + "\n"
-                for _, r in group.iterrows()
-            )
+            lines.extend(self._df2lines(group.drop("time", axis=1)))
             # Add a blank line after each group
             lines.append("\n")
         return lines
