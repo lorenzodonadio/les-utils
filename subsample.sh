@@ -15,7 +15,7 @@ conda activate base
 pip install -r requirements.txt
 
 NC_FILE="/scratch/ldonadio/dales-runs/must_test2/completefielddump.nc"
-OUTPUT_DIR=./
-SAMPLING_RATES="5,15,30"
+OUTPUT_DIR="/scratch/ldonadio/dales-runs/must_test2/"
+SAMPLING_RATES="1,5,10,30,60"
 
-python fieldsubsample.py ${NC_FILE} --output_dir ${OUTPUT_DIR} --sampling_rates ${SAMPLING_RATES} --skip_first 100 --batch_size 500
+python fieldsubsample.py ${NC_FILE} --output_dir ${OUTPUT_DIR} --sampling_rates ${SAMPLING_RATES} --skip_first 432 --batch_size 50
