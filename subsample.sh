@@ -19,5 +19,3 @@ OUTPUT_DIR=./
 SAMPLING_RATES="5,15,30"
 
 python fieldsubsample.py ${NC_FILE} --output_dir ${OUTPUT_DIR} --sampling_rates ${SAMPLING_RATES} --skip_first 100 --batch_size 500
-
-echo "Subsample completed succesfully"

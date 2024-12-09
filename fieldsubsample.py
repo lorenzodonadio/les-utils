@@ -3,7 +3,6 @@
 
 import numpy as np
 from netCDF4 import Dataset
-import matplotlib.pyplot as plt
 import os
 import argparse
 
