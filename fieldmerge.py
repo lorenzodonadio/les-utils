@@ -115,6 +115,10 @@ class PostProcessField:
                             var_name, var_dtype, var_dims
                         )
 
+                        print(f"Merging variable: {var_name}")
+                        print(var_dims, var_dtype)
+                        print("------------------")
+
                         total_time_steps = len(self.dims["time"])
                         for time_start in tqdm(range(0, total_time_steps, chunk_size)):
                             time_end = min(time_start + chunk_size, total_time_steps)
@@ -124,8 +128,10 @@ class PostProcessField:
                             new_dataset.variables[var_name][
                                 time_start:time_end, :, :, :
                             ] = chunk_data
-
+            print("-------- Completed Merge ----------")
+            print(new_dataset)
             print(f"Merged data saved to {output_file}")
+            print("-----------------------------------")
 
 
 def add_profiles_to_dataset(profile_path: str, dataset_path: str):
