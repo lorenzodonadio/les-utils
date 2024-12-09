@@ -10,7 +10,7 @@ import argparse
 def subsample_netcdf(
     input_file,
     output_dir="./",
-    skip_first=120,
+    skip_first=0,
     sampling_rates=[5, 10, 30, 60],
     batch_size=200,
 ):
@@ -36,7 +36,7 @@ def subsample_netcdf(
         # Iterate over the desired sampling rates
         for rate in sampling_rates:
             # Determine the indices to keep for this sampling rate
-            indices = np.arange(0, n_time_steps, rate)
+            indices = np.arange(skip_first, n_time_steps, rate)
             subsampled_time = time[indices]
 
             # Create output NetCDF file
@@ -73,7 +73,7 @@ def subsample_netcdf(
                         new_var = dst.createVariable(name, variable.datatype, new_dims)
 
                         # Process data in batches
-                        for start in range(0, len(indices), batch_size):
+                        for start in range(skip_first, len(indices), batch_size):
                             end = min(start + batch_size, len(indices))
                             batch_indices = indices[start:end]
                             new_var[start:end] = variable[batch_indices]
