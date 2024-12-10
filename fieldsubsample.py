@@ -12,32 +12,26 @@ def subsample_netcdf(
     output_dir="./",
     skip_first=0,
     sampling_rates=[5, 10, 30, 60],
-    batch_size=200,
+    batch_size=100,
 ):
     """
-    Subsample a NetCDF file in time, skipping the initial non-physical observations, using batch processing.
+    Subsample a NetCDF file in time, skipping the initial non-physical observations.
 
     Parameters:
         input_file (str): Path to the input NetCDF file.
         output_dir (str): Directory to save the subsampled NetCDF files.
         skip_first (int): Number of initial time steps to skip.
         sampling_rates (list): List of sampling rates in seconds.
-        batch_size (int): Number of time steps to process in each batch.
     """
     # Open the input NetCDF file
     with Dataset(input_file, "r") as src:
         # Read time variable
         time = src.variables["time"][:]
 
-        # Skip initial non-physical observations
-        time = time[skip_first:] - time[skip_first]
-        n_time_steps = len(time)
-
         # Iterate over the desired sampling rates
         for rate in sampling_rates:
-            # Determine the indices to keep for this sampling rate
-            indices = np.arange(skip_first, n_time_steps, rate)
-            subsampled_time = time[indices]
+            subsampled_time = time[skip_first::rate] - time[skip_first]
+            pointperbatch = batch_size // rate
 
             # Create output NetCDF file
             output_file = os.path.join(output_dir, f"fielddump_{rate}s.nc")
@@ -65,18 +59,24 @@ def subsample_netcdf(
                             }
                         )
                     elif "time" in variable.dimensions:
-                        # Subsample variables that depend on time using batch processing
+                        # Subsample variables that depend on time
                         new_dims = tuple(
                             dim if dim != "time" else "time"
                             for dim in variable.dimensions
                         )
                         new_var = dst.createVariable(name, variable.datatype, new_dims)
 
-                        # Process data in batches
-                        for start in range(skip_first, len(indices), batch_size):
-                            end = min(start + batch_size, len(indices))
-                            batch_indices = indices[start:end]
-                            new_var[start:end] = variable[batch_indices]
+                        i = 0
+                        end = 0
+                        n = len(variable)
+                        while end < n:
+                            start = skip_first + i * batch_size
+                            end = min(start + batch_size, n)
+                            # print(start,end)
+                            si, ei = i * pointperbatch, (i + 1) * pointperbatch
+                            new_var[si:ei] = variable[start:end:rate]
+                            i += 1
+                        # new_var[:] = variable[indices]
                         new_var.setncatts(
                             {
                                 attr: variable.getncattr(attr)
