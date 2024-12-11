@@ -18,4 +18,4 @@ NC_FILE="/scratch/ldonadio/dales-runs/must_test2/completefielddump.nc"
 OUTPUT_DIR="/scratch/ldonadio/dales-runs/must_test2/"
 SAMPLING_RATES="1,5,10,30,60"
 
-python fieldsubsample.py ${NC_FILE} --output_dir ${OUTPUT_DIR} --sampling_rates ${SAMPLING_RATES} --skip_first 432 --batch_size 50
+python fieldsubsample.py ${NC_FILE} --output_dir ${OUTPUT_DIR} --sampling_rates ${SAMPLING_RATES} --skip_first 432 --nbatches 10

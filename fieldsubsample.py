@@ -5,8 +5,8 @@ import numpy as np
 from netCDF4 import Dataset
 import os
 import argparse
-from tqdm import tqdm
 import math
+from tqdm import tqdm
 
 
 def subsample_netcdf(
@@ -125,3 +125,56 @@ def subsample_netcdf(
                 dst.setncatts({attr: src.getncattr(attr) for attr in src.ncattrs()})
 
                 print(f"Created subsampled file: {output_file}")
+
+
+def main():
+    """
+    Main entry point for the CLI. Sampling rates are in seconds and must be integers.
+    """
+    parser = argparse.ArgumentParser(description="CLI for subsampling fielddump files.")
+    parser.add_argument("input_file", type=str, help="Path to the input NetCDF file.")
+    parser.add_argument(
+        "--output_dir",
+        type=str,
+        default="./",
+        help="Directory to save the subsampled NetCDF files. Default is './'.",
+    )
+    parser.add_argument(
+        "--skip_first",
+        type=int,
+        default=120,
+        help="Number of initial time steps to skip. Default is 120.",
+    )
+    parser.add_argument(
+        "--sampling_rates",
+        type=str,
+        default="5,10,30,60",
+        help="Comma-separated list of sampling rates in seconds. Default is '5,10,30,60'.",
+    )
+    parser.add_argument(
+        "--nbatches",
+        type=int,
+        default=10,
+        help="Number of batches to process the data. Default is 10.",
+    )
+    args = parser.parse_args()
+
+    # Parse sampling rates into a list of integers
+    try:
+        sampling_rates = list(map(int, args.sampling_rates.split(",")))
+    except ValueError:
+        print("Error: Sampling rates must be a comma-separated list of integers.")
+        exit(1)
+
+    # Call the subsampling function
+    subsample_netcdf(
+        input_file=args.input_file,
+        output_dir=args.output_dir,
+        skip_first=args.skip_first,
+        sampling_rates=sampling_rates,
+        nbatches=args.nbatches,
+    )
+
+
+if __name__ == "__main__":
+    main()
