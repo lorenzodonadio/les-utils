@@ -64,9 +64,7 @@ class GenTracerProfile:
         init = tracer.createVariable("init", "f4", ("z", "y", "x"))
         init[:, :, :] = 0
 
-    def add_point_source(
-        self, tracer_name: str, x: int, y: int, z: int, values: np.ndarray | float
-    ):
+    def add_point_source(self, tracer_name: str, x: int, y: int, z: int, values):
         assert (
             tracer_name in self._trac_dict
         ), f"Add a tracer with that name first, current tracers: {self._trac_dict.keys()}"
