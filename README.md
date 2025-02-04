@@ -37,7 +37,7 @@ see `/examples` folder for use of dales_inp_generator.py
 
 Suppose you have a typical DALES output directory containing multiple NetCDF files, located here:
 
-`ls ../utrecht_result_data/utrecht_ideal_save/`
+`ls ../my_output_dir/`
 
 Example directory structure:
 ```
@@ -49,7 +49,7 @@ fielddump.000.002.001.nc  fielddump.001.002.001.nc  fielddump.002.002.001.nc  fi
 To merge the files and include profile data, use the following command:
 
 ```python fieldmerge.py merge --input_dir ../utrecht_result_data/utrecht_ideal_save/ \
-    --profile_file ../utrecht_result_data/utrecht_ideal_save/profiles_lite.001.nc
+    --profile_file ../my_output_dir/profiles_lite.001.nc
 ```
 
     --input_dir: The directory containing DALES output NetCDF files to be merged.
