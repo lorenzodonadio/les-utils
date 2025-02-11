@@ -43,9 +43,9 @@ class GenTracerProfile:
         self.ncfile.createDimension("x", self.x_size)
         self.ncfile.createDimension("y", self.y_size)
         self.ncfile.createDimension("z", self.z_size)
-
+    
     def add_tracer(
-        self, name: str, traclong="", unit="kg/kg", molar_mass=-999.0, lemis=True
+        self, name: str, traclong="", unit="kg/kg", molar_mass=-999.0, lemis=True,initial_value = 0 
     ):
         assert (
             name not in self._trac_dict.keys()
@@ -62,7 +62,7 @@ class GenTracerProfile:
 
         # init = tracer.createVariable("init", "f4", ("x", "y", "z"))
         init = tracer.createVariable("init", "f4", ("z", "y", "x"))
-        init[:, :, :] = 0
+        init[:, :, :] = initial_value
 
     def add_point_source(self, tracer_name: str, x: int, y: int, z: int, values):
         assert (

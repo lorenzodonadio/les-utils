@@ -1,5 +1,5 @@
 import numpy as np
-from dales_inp_generator import DALESInpGenerator
+from dales_input_generator.dales_inp_generator import DALESInpGenerator
 
 # make sure you have dales_inp_generator.py in your current working directory
 
