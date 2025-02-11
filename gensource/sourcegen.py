@@ -47,6 +47,9 @@ class GenTracerProfile:
     def add_tracer(
         self, name: str, traclong="", unit="kg/kg", molar_mass=-999.0, lemis=True,initial_value = 0 
     ):
+        """
+        `initial_value` can be a number or an np.array, in case of an array the dimensions must match those of the field specified in `field_path`. in order Z,Y,X
+        """
         assert (
             name not in self._trac_dict.keys()
         ), "Tracer with that name already exists"
