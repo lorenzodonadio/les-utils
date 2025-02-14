@@ -31,7 +31,7 @@ pip install -r requirements.txt
 
 **PROFILES CREATON: Example Usage**
 
-see `/examples` folder for use of dales_inp_generator.py
+see the jupyter examples folder for use of dales_inp_generator.py
 
 **MERGE: Example Usage**
 
