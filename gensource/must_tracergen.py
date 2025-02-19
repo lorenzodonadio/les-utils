@@ -120,7 +120,7 @@ def main():
                 # print(xarr[r,n,nsv],yarr[r,n,nsv])
                 x, y = xarr[r, n, nsv], yarr[r, n, nsv]
                 tracer_name = f"s{nsv}"
-                tp.add_tracer(tracer_name, f"s{nsv}_x_{x:3}_y_{y:3}", "kg/kg")
+                tp.add_tracer(tracer_name, f"s{nsv}_x_{x:3}_y_{y:3}".replace(' ',''), "kg/kg")
                 tp.add_point_source(tracer_name, x, y, 2, step_source)
             tp.close()
 
