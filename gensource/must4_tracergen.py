@@ -74,7 +74,7 @@ def main():
         fname = f"{args.output_dir}tracer_inp_{n+1:03}.nc"
         tp = GenTracerProfile(file_path=fname, fieldump_path=args.filedump_path)
         print('-----------new tracer file------------')
-        print(srcname)
+        print(fname)
         print(xarr[n, :], yarr[n, :])
         for nsv in range(tracers_per_core):
             # print(xarr[r,n,nsv],yarr[r,n,nsv])

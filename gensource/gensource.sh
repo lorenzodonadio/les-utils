@@ -12,9 +12,9 @@
 
 module load miniconda3/4.12.0
 conda activate base
-pip install -r requirements.txt
+pip install -r ../requirements.txt
 
-FIELD_DUMP_NC="/scratch/ldonadio/dales-runs/must_test2/fielddump_10s.nc"
-OUTPUT_DIR="/scratch/ldonadio/adepostles-runs/must2/tracers/"
+FIELD_DUMP_NC="/scratch/ldonadio/dales-runs/must4/wd_0deg/fielddump_1s.nc"
+OUTPUT_DIR="/scratch/ldonadio/adepostles-runs/must4/tracers/"
 
 python must_tracergen.py ${FIELD_DUMP_NC} --output_dir ${OUTPUT_DIR}
